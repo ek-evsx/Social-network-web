@@ -4,12 +4,8 @@
             <Logo />
         </div>
 
-        <a-form :form="form">
-            <a-form-item
-                :label-col="formItemLayout.labelCol"
-                :wrapper-col="formItemLayout.wrapperCol"
-                label="Login"
-            >
+        <a-form :form="form" class="login-form" @submit="onSubmit">
+            <a-form-item>
                 <a-input
                     v-decorator="[
                         'username',
@@ -17,56 +13,83 @@
                             rules: [
                                 {
                                     required: true,
-                                    message: 'Please input your login'
+                                    message: 'Please input your username!'
                                 }
                             ]
                         }
                     ]"
-                    placeholder="Please input your login"
-                />
+                    placeholder="Username"
+                >
+                    <a-icon
+                        slot="prefix"
+                        type="user"
+                        style="color: rgba(0,0,0,.25)"
+                    />
+                </a-input>
             </a-form-item>
-            <a-form-item
-                :label-col="formItemLayout.labelCol"
-                :wrapper-col="formItemLayout.wrapperCol"
-                label="Password"
-            >
+            <a-form-item>
                 <a-input
-                    type="password"
                     v-decorator="[
                         'password',
                         {
                             rules: [
                                 {
                                     required: true,
-                                    message: 'Please input your password'
+                                    message: 'Please input your password!'
                                 }
                             ]
                         }
                     ]"
-                    placeholder="Please input your password"
-                />
+                    placeholder="Password"
+                    type="password"
+                >
+                    <a-icon
+                        slot="prefix"
+                        type="lock"
+                        style="color: rgba(0,0,0,.25)"
+                    />
+                </a-input>
             </a-form-item>
-            <a-form-item
-                :label-col="formTailLayout.labelCol"
-                :wrapper-col="formTailLayout.wrapperCol"
-            >
-                <a-checkbox :checked="isRemember" @change="handleChange">
-                    Remember?
+            <a-form-item class="login-form__footer">
+                <a-checkbox
+                    v-decorator="[
+                        'isRemember',
+                        {
+                            valuePropName: 'checked',
+                            initialValue: false
+                        }
+                    ]"
+                >
+                    Remember me
                 </a-checkbox>
-            </a-form-item>
-            <a-form-item
-                :label-col="formTailLayout.labelCol"
-                :wrapper-col="formTailLayout.wrapperCol"
-            >
-                <a-button type="submit" @click="onSubmit">
-                    Log in!
+                <a class="login-form__forgot" href="#">
+                    Forgot password
+                </a>
+                <a-button
+                    type="primary"
+                    html-type="submit"
+                    class="login-form__button"
+                >
+                    Log in
                 </a-button>
+                Or
+                <a href="#">
+                    Register now!
+                </a>
             </a-form-item>
         </a-form>
+        <footer class="footer">
+            <div class="copyright">
+                Copyright by
+                <a href="http://evsx.com">
+                    EVS inc.©
+                </a>
+            </div>
+        </footer>
     </div>
 </template>
 
-<script lang="ts">
+<script>
 import { mapActions } from 'vuex';
 import Vue from 'vue';
 import { Form } from 'ant-design-vue';
@@ -75,34 +98,28 @@ import 'ant-design-vue/dist/antd.css';
 
 Vue.use(Form);
 
-const formItemLayout = {
-    labelCol: { span: 12 },
-    wrapperCol: { span: 12 }
-};
-const formTailLayout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 12, offset: 4 }
-};
-
 export default {
-    //@ts-ignore
     data() {
         return {
             isRemember: false,
-            username: '',
-            password: '',
-            formItemLayout,
-            formTailLayout,
-            //@ts-ignore
-            form: this.$form.createForm(this, { name: 'dynamic_rule' })
+            form: this.$form.createForm(this, { name: 'normal_login' })
         };
     },
     methods: {
-        ...mapActions(['login']),
-        async onSubmit() {
-            console.log(this);
-            //@ts-ignore
-            this.login();
+        ...mapActions({
+            login: 'auth/login'
+        }),
+
+        async onSubmit(e) {
+            e.preventDefault();
+            this.form.validateFields((err, values) => {
+                if (!err) {
+                    this.login({
+                        login: values.username,
+                        password: values.password
+                    });
+                }
+            });
         }
     }
 };
@@ -110,12 +127,10 @@ export default {
 
 <style>
 .container {
-    margin: 0 auto;
+    margin: 50px auto;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    text-align: center;
     flex-direction: column;
 }
 
@@ -132,7 +147,28 @@ export default {
 
 .logo-container {
     margin: 20px auto;
-    width: 200px;
-    height: 100px;
+    width: 300px;
+    height: 80px;
+}
+
+.login-form {
+    margin: 50px auto;
+    width: 35%;
+}
+
+.login-form__forgot {
+    float: right;
+}
+
+.login-form__button {
+    width: 100%;
+}
+
+.footer {
+    background-color: #eee;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 20px 50px;
 }
 </style>
